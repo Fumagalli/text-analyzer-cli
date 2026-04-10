@@ -29,7 +29,8 @@ export function extraiParagrafos(texto: string): string[] {
  * Remove caracteres especiais/pontuação da palavra.
  */
 function limpaPalavras(palavra: string): string {
-  const regex = /[.,\/#!$%\^&\*;:{}=\-_`~()]/g;
+  const regex =
+    /[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\\\u2014\u2013\u2026\u201C\u201D\u2018\u2019]/g;
   return palavra.replace(regex, '');
 }
 
