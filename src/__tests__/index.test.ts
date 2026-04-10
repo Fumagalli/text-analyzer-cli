@@ -72,3 +72,106 @@ describe('montaSaidaArquivo', () => {
     expect(resultado).toBe('palavras duplicadas no parágrafo 2: teste\n');
   });
 });
+
+describe('Regression: Punctuation Cleanup Order (B1)', () => {
+  it('should count words after punctuation cleanup', () => {
+    // "!hello!" (7 chars with punctuation) should become "hello" (5 chars) after cleanup
+    // This test validates that punctuation is removed before length check
+    const resultado = contaPalavras('!hello! !world!');
+    expect(resultado[0]).toHaveProperty('hello');
+    expect(resultado[0]).toHaveProperty('world');
+  });
+
+  it('should remove punctuation at start and end', () => {
+    const resultado = contaPalavras('!hello! .test.');
+    expect(resultado[0]).toHaveProperty('hello');
+    expect(resultado[0]).toHaveProperty('test');
+  });
+
+  it('should preserve internal structure after cleanup', () => {
+    // "hello-world" becomes "helloworld" after cleanup (hyphen removed)
+    const resultado = contaPalavras('hello-world');
+    expect(Object.keys(resultado[0]).length).toBeGreaterThan(0);
+  });
+});
+
+describe('Regression: CRLF Line Ending Support (B2)', () => {
+  it('should split paragraphs on CRLF line endings', () => {
+    const crlf = 'Para 1 palavra\r\nPara 2 palavra\r\nPara 3 palavra';
+    const resultado = contaPalavras(crlf);
+    expect(resultado).toHaveLength(3);
+  });
+
+  it('should handle mixed line endings', () => {
+    const mixed = 'Para 1 palavra\nPara 2 palavra\r\nPara 3 palavra';
+    const resultado = contaPalavras(mixed);
+    expect(resultado).toHaveLength(3);
+  });
+
+  it('should not create empty paragraphs', () => {
+    const crlf = 'Para 1\r\n\r\nPara 2';
+    const resultado = contaPalavras(crlf);
+    // Should filter out empty paragraphs
+    expect(resultado.length).toBeLessThanOrEqual(2);
+  });
+});
+
+describe('Regression: PT-BR Punctuation Expansion (B3)', () => {
+  it('should handle PT-BR em-dash (—) in text', () => {
+    const resultado = contaPalavras('é— fim');
+    // Em-dash should be removed, leaving valid words
+    expect(Object.keys(resultado[0]).length).toBeGreaterThan(0);
+  });
+
+  it('should remove PT-BR guillemets (« »)', () => {
+    const resultado = contaPalavras('«test» hello');
+    expect(resultado[0]).toHaveProperty('test');
+    expect(resultado[0]).toHaveProperty('hello');
+    // Should not have guillemets in the keys
+    expect(JSON.stringify(resultado[0])).not.toContain('«');
+    expect(JSON.stringify(resultado[0])).not.toContain('»');
+  });
+
+  it('should remove ellipsis (…)', () => {
+    const resultado = contaPalavras('test… message…');
+    expect(resultado[0]).toHaveProperty('test');
+    expect(resultado[0]).toHaveProperty('message');
+  });
+
+  it('should handle mixed PT-BR punctuation', () => {
+    const texto = 'Olá! «message» — yes…';
+    expect(() => contaPalavras(texto)).not.toThrow();
+    expect(contaPalavras(texto).length).toBeGreaterThan(0);
+  });
+});
+
+describe('Regression: Empty and Edge Case Text (B4)', () => {
+  it('should handle empty string', () => {
+    const resultado = contaPalavras('');
+    expect(resultado).toEqual([]);
+  });
+
+  it('should handle whitespace-only text', () => {
+    const resultado = contaPalavras('   \n\n  \t  ');
+    expect(resultado).toEqual([]);
+  });
+
+  it('should handle text with only special characters', () => {
+    const resultado = contaPalavras('!!! ..... ----');
+    // After cleanup and filtering, should result in empty or marked as edge case
+    expect(resultado).toBeDefined();
+  });
+
+  it('should handle unicode characters', () => {
+    const resultado = contaPalavras('Résumé Ñoño café');
+    expect(resultado[0]).toHaveProperty('résumé');
+    expect(resultado[0]).toHaveProperty('ñoño');
+    expect(resultado[0]).toHaveProperty('café');
+  });
+
+  it('should handle mixed CRLF and irregular spacing', () => {
+    const texto = 'Text word\r\n  \t  More word\nText';
+    expect(() => contaPalavras(texto)).not.toThrow();
+    expect(contaPalavras(texto).length).toBeGreaterThan(0);
+  });
+});

@@ -30,7 +30,7 @@ export function extraiParagrafos(texto: string): string[] {
  */
 function limpaPalavras(palavra: string): string {
   const regex =
-    /[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\\\u2014\u2013\u2026\u201C\u201D\u2018\u2019]/g;
+    /[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\\\u2014\u2013\u2026\u201C\u201D\u2018\u2019\u00AB\u00BB?]/g;
   return palavra.replace(regex, '');
 }
 
