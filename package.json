@@ -27,7 +27,7 @@
   ],
   "author": "Fumagalli",
   "license": "MIT",
-  "repository": "",
+  "repository": "git@github.com:Fumagalli/text-analyzer-cli.git",
   "type": "module",
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
