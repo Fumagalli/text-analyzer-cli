@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "target": "es2020",
+    "moduleResolution": "node16",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": ["node", "vitest"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
