@@ -19,7 +19,10 @@ export function contaPalavras(
  * Extrai parágrafos do texto, dividindo por quebras de linha e convertendo para minúsculas.
  */
 export function extraiParagrafos(texto: string): string[] {
-  return texto.toLowerCase().split('\n');
+  return texto
+    .toLowerCase()
+    .split(/\r?\n/)
+    .filter((paragrafo) => paragrafo.trim() !== '');
 }
 
 /**
@@ -37,7 +40,7 @@ function verificaPalavrasDuplicadas(
   texto: string,
   minChars: number
 ): Record<string, number> {
-  const listaPalavras = texto.split(' ');
+  const listaPalavras = texto.split(/\s+/);
   const resultado: Record<string, number> = {};
 
   listaPalavras.forEach((palavra) => {
