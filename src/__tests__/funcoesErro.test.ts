@@ -21,4 +21,23 @@ describe('trataErros', () => {
 
     expect(() => trataErros(erro)).toThrow('erro desconhecido');
   });
+
+  it('trata erro com código desconhecido usando fallback', () => {
+    const erro = new Error('erro customizado') as Error & { code?: string };
+    erro.code = 'UNKNOWN_CODE';
+
+    expect(() => trataErros(erro)).toThrow('Erro: erro customizado');
+  });
+
+  it('preserva stack trace do erro original', () => {
+    const erro = new Error('erro de teste') as Error & { code?: string };
+    erro.code = 'ENOENT';
+    const originalStack = erro.stack;
+
+    try {
+      trataErros(erro);
+    } catch (caught) {
+      expect((caught as Error).stack).toBe(originalStack);
+    }
+  });
 });
