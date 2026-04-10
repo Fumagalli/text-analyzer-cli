@@ -135,7 +135,7 @@ export async function criaESalvaArquivo(
   endereco: string,
   minCount: number
 ): Promise<void> {
-  const arquivoNovo = `${endereco}/resultado.txt`;
+  const arquivoNovo = path.join(endereco, 'resultado.txt');
   const textoPalavras = montaSaidaArquivo(listaPalavras, minCount);
 
   await fs.promises.writeFile(arquivoNovo, textoPalavras);
