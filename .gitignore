@@ -26,7 +26,6 @@ coverage/
 *.lcov
 .nyc_output/
 
-# Test coverage (local only, don't commit)
-coverage/
-*.lcov
-.nyc_output/
+# Development & local only
+.specs/
+.claude/
