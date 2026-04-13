@@ -49,8 +49,8 @@ Expected: 0 errors
 
 **What:** Rename 2 functions + update variables + JSDoc  
 **Where:** src/helpers.ts (full file)  
-**Depends on:** T1 (uses index.ts exports)  
-**Reuses:** T1 exports  
+**Depends on:** None (helpers.ts is independent; can run parallel with T1)  
+**Reuses:** None (internal functions only)  
 
 **Changes Required:**
 1. Functions:

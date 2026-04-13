@@ -1,29 +1,29 @@
 /**
- * Filtra palavras que aparecem mais de minCount vezes no parágrafo.
+ * Filters words that appear more than minCount times in the paragraph.
  */
-function filtraOcorrencias(
-  paragrafo: Record<string, number>,
+function filterOccurrences(
+  paragraph: Record<string, number>,
   minCount: number = 2
 ): string[] {
-  return Object.keys(paragrafo).filter((chave) => paragrafo[chave] >= minCount);
+  return Object.keys(paragraph).filter((key) => paragraph[key] >= minCount);
 }
 
 /**
- * Monta a saída do arquivo com palavras duplicadas por parágrafo.
+ * Builds the output file with duplicate words per paragraph.
  */
-function montaSaidaArquivo(
-  listaPalavras: Record<string, number>[],
+function buildOutputFormat(
+  wordList: Record<string, number>[],
   minCount: number = 2
 ): string {
-  const linhas = listaPalavras
-    .map((paragrafo, index) => {
-      const duplicadas = filtraOcorrencias(paragrafo, minCount).join(', ');
-      if (!duplicadas) return null;
-      return `palavras duplicadas no parágrafo ${index + 1}: ${duplicadas}`;
+  const lines = wordList
+    .map((paragraph, index) => {
+      const repeated = filterOccurrences(paragraph, minCount).join(', ');
+      if (!repeated) return null;
+      return `palavras duplicadas no parágrafo ${index + 1}: ${repeated}`;
     })
-    .filter((linha): linha is string => linha !== null);
+    .filter((line): line is string => line !== null);
 
-  return linhas.length > 0 ? linhas.join('\n') + '\n' : '';
+  return lines.length > 0 ? lines.join('\n') + '\n' : '';
 }
 
-export { montaSaidaArquivo };
+export { buildOutputFormat };

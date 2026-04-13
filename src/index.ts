@@ -1,63 +1,57 @@
 /**
- * Contagem de palavras por parágrafo: palavra -> número de ocorrências
+ * Word count per paragraph: word -> number of occurrences
  */
-export interface ContagemParagrafo {
-  [palavra: string]: number;
+export interface WordCountMap {
+  [word: string]: number;
 }
 
 /**
- * Conta palavras duplicadas em cada parágrafo do texto fornecido.
+ * Counts duplicate words in each paragraph of the provided text.
  */
-export function contaPalavras(
-  texto: string,
-  minChars: number = 3
-): ContagemParagrafo[] {
-  const paragrafos = extraiParagrafos(texto);
-  const contagem = paragrafos.flatMap((paragrafo): ContagemParagrafo[] => {
-    if (!paragrafo) return [];
+export function countWords(text: string, minChars: number = 3): WordCountMap[] {
+  const paragraphs = extractParagraphs(text);
+  const count = paragraphs.flatMap((paragraph): WordCountMap[] => {
+    if (!paragraph) return [];
 
-    return [verificaPalavrasDuplicadas(paragrafo, minChars)];
+    return [analyzeWordFrequency(paragraph, minChars)];
   });
 
-  return contagem;
+  return count;
 }
 
 /**
- * Extrai parágrafos do texto, dividindo por quebras de linha e convertendo para minúsculas.
+ * Extracts paragraphs from the text, splitting by line breaks and converting to lowercase.
  */
-export function extraiParagrafos(texto: string): string[] {
-  return texto
+export function extractParagraphs(text: string): string[] {
+  return text
     .toLowerCase()
     .split(/\r?\n/)
-    .filter((paragrafo) => paragrafo.trim() !== '');
+    .filter((paragraph) => paragraph.trim() !== '');
 }
 
 /**
- * Remove caracteres especiais/pontuação da palavra.
+ * Removes special characters and punctuation from a word.
  */
-function limpaPalavras(palavra: string): string {
+function cleanWord(word: string): string {
   const regex =
     /[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\\\u2014\u2013\u2026\u201C\u201D\u2018\u2019\u00AB\u00BB?]/g;
-  return palavra.replace(regex, '');
+  return word.replace(regex, '');
 }
 
 /**
- * Verifica e conta ocorrências de palavras em um texto, ignorando palavras < minChars caracteres.
+ * Checks and counts word occurrences in a text, ignoring words < minChars characters.
  */
-function verificaPalavrasDuplicadas(
-  texto: string,
-  minChars: number
-): ContagemParagrafo {
-  const listaPalavras = texto.split(/\s+/);
-  const resultado: ContagemParagrafo = {};
+function analyzeWordFrequency(text: string, minChars: number): WordCountMap {
+  const wordList = text.split(/\s+/);
+  const result: WordCountMap = {};
 
-  listaPalavras.forEach((palavra) => {
-    const palavraLimpa = limpaPalavras(palavra);
-    if (!palavraLimpa) return;
-    if (palavraLimpa.length < minChars) return;
+  wordList.forEach((word) => {
+    const cleanedWord = cleanWord(word);
+    if (!cleanedWord) return;
+    if (cleanedWord.length < minChars) return;
 
-    resultado[palavraLimpa] = (resultado[palavraLimpa] || 0) + 1;
+    result[cleanedWord] = (result[cleanedWord] || 0) + 1;
   });
 
-  return resultado;
+  return result;
 }

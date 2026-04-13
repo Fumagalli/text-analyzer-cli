@@ -131,6 +131,28 @@ All changes in one refactor commit with full message.
 
 ---
 
+## Out of Scope
+
+The following items are explicitly **NOT** included in this refactor:
+
+### What Will NOT Change
+- `.git` history and commit messages (existing commits stay as-is)
+- Branch names (no renaming of git branches)
+- Documentation files (README.md, WORKFLOW.md, etc. — remain Portuguese or bilingual)
+- Configuration files naming (eslint.config.js, tsconfig.json, etc.)
+- User-facing CLI messages (help text, error messages, console output — remain Portuguese)
+- Test file names (remain as-is: `*.test.ts`)
+- Package names or export names already in English (e.g., `buildProgram`, `regex`)
+- External dependencies or library naming
+- Environment variables or build artifacts naming
+
+### What WILL Change
+- ✅ Source code identifiers only: functions, variables, types, interfaces, internal comments (JSDoc)
+- ✅ Test file contents (function call sites, import statements)
+- ✅ Comments and documentation within code (inline JSDoc)
+
+---
+
 ## Assumptions
 
 1. No downstream consumers yet (not published to npm) — breaking change acceptable
@@ -148,12 +170,3 @@ All changes in one refactor commit with full message.
 ✅ Output file contains Portuguese message: `"palavras duplicadas no parágrafo"`  
 ✅ Code passes linter, type checker, and tests  
 ✅ Commit message is detailed and traceable
-
----
-
-## Out of Scope (Future)
-
-- Internationalization (i18n) system — planned for next phase
-- Documentation updates (README examples can stay bilingual for reference)
-- Version bump or npm publication
-- Refactoring test message strings (keep as-is for stable assertions)
