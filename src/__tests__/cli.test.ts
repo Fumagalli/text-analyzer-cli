@@ -392,4 +392,78 @@ describe('E2E: File Operations Pipeline', () => {
     expect(outputContent).toContain('palavras duplicadas no parágrafo');
     expect(outputContent).toMatch(/\w+/); // Contains words
   });
+
+  it('should write to custom filename with --output flag', async () => {
+    const inputFile = path.join(tempInputDir, 'test-custom-output.txt');
+    const inputContent = 'hello world\nhello test\nworld test test';
+
+    fs.writeFileSync(inputFile, inputContent, 'utf-8');
+
+    // Execute with custom output filename
+    await processaArquivo(inputFile, tempOutputDir, 1, 2, 'custom.txt');
+
+    // Verify: Custom output file exists
+    const customOutputFile = path.join(tempOutputDir, 'custom.txt');
+    expect(fs.existsSync(customOutputFile)).toBe(true);
+
+    // Verify: Default filename does NOT exist
+    const defaultOutputFile = path.join(tempOutputDir, 'resultado.txt');
+    expect(fs.existsSync(defaultOutputFile)).toBe(false);
+
+    // Verify: Custom file has content
+    const outputContent = fs.readFileSync(customOutputFile, 'utf-8');
+    expect(outputContent).toBeTruthy();
+    expect(outputContent).toContain('palavras duplicadas');
+  });
+
+  it('should suppress console output with quiet flag', async () => {
+    const inputFile = path.join(tempInputDir, 'test-quiet.txt');
+    const inputContent = 'word word test';
+
+    fs.writeFileSync(inputFile, inputContent, 'utf-8');
+
+    // Spy on console.log to verify suppression
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    // Execute with quiet flag
+    await processaArquivo(inputFile, tempOutputDir, 1, 1, undefined, true);
+
+    // Verify: console.log was NOT called ("arquivo criado" message)
+    expect(consoleLogSpy).not.toHaveBeenCalledWith('arquivo criado');
+
+    // Verify: File was still written
+    const outputFile = path.join(tempOutputDir, 'resultado.txt');
+    expect(fs.existsSync(outputFile)).toBe(true);
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should use custom filename AND suppress console with both flags', async () => {
+    const inputFile = path.join(tempInputDir, 'test-both-flags.txt');
+    const inputContent = 'test word word';
+
+    fs.writeFileSync(inputFile, inputContent, 'utf-8');
+
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    // Execute with BOTH --output and --quiet
+    await processaArquivo(inputFile, tempOutputDir, 1, 2, 'combined.txt', true);
+
+    // Verify: Custom file exists
+    const customOutputFile = path.join(tempOutputDir, 'combined.txt');
+    expect(fs.existsSync(customOutputFile)).toBe(true);
+
+    // Verify: Default file does NOT exist
+    const defaultOutputFile = path.join(tempOutputDir, 'resultado.txt');
+    expect(fs.existsSync(defaultOutputFile)).toBe(false);
+
+    // Verify: Console was silent
+    expect(consoleLogSpy).not.toHaveBeenCalledWith('arquivo criado');
+
+    // Verify: File has content
+    const outputContent = fs.readFileSync(customOutputFile, 'utf-8');
+    expect(outputContent).toBeTruthy();
+
+    consoleLogSpy.mockRestore();
+  });
 });

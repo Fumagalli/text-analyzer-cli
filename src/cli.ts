@@ -36,14 +36,22 @@ export function buildProgram(): Command {
       'ocorrências mínimas para considerar duplicada',
       '2'
     )
+    .option(
+      '-o, --output <string>',
+      'nome do arquivo de saída',
+      'resultado.txt'
+    )
+    .option('-q, --quiet', 'suprime saída no console')
     .action(
       async (options: {
         texto: string;
         destino: string;
         minChars: string;
         minCount: string;
+        output: string;
+        quiet: boolean;
       }) => {
-        const { texto, destino, minChars, minCount } = options;
+        const { texto, destino, minChars, minCount, output, quiet } = options;
 
         if (!texto || !destino) {
           console.error(
@@ -60,15 +68,19 @@ export function buildProgram(): Command {
         const caminhoDestino = path.resolve(destino);
 
         try {
-          await validaEntrada(caminhoTexto, caminhoDestino);
+          await validaEntrada(caminhoTexto, caminhoDestino, quiet);
 
           await processaArquivo(
             caminhoTexto,
             caminhoDestino,
             minCharsNumero,
-            minCountNumero
+            minCountNumero,
+            output,
+            quiet
           );
-          console.log(chalk.green('texto processado com sucesso'));
+          if (!quiet) {
+            console.log(chalk.green('texto processado com sucesso'));
+          }
         } catch (error) {
           try {
             trataErros(error as Error);
@@ -90,7 +102,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
 export async function validaEntrada(
   caminhoTexto: string,
-  caminhoDestino: string
+  caminhoDestino: string,
+  _quiet?: boolean
 ): Promise<void> {
   if (path.extname(caminhoTexto).toLowerCase() !== '.txt') {
     throw new Error(`Arquivo precisa ter extensão .txt: ${caminhoTexto}`);
@@ -123,21 +136,27 @@ export async function processaArquivo(
   texto: string,
   destino: string,
   minChars: number,
-  minCount: number
+  minCount: number,
+  outputFile?: string,
+  quiet?: boolean
 ): Promise<void> {
   const conteudo = await fs.promises.readFile(texto, 'utf-8');
   const resultado = contaPalavras(conteudo, minChars);
-  await criaESalvaArquivo(resultado, destino, minCount);
+  await criaESalvaArquivo(resultado, destino, minCount, outputFile, quiet);
 }
 
 export async function criaESalvaArquivo(
   listaPalavras: Record<string, number>[],
   endereco: string,
-  minCount: number
+  minCount: number,
+  outputFile: string = 'resultado.txt',
+  quiet?: boolean
 ): Promise<void> {
-  const arquivoNovo = path.join(endereco, 'resultado.txt');
+  const arquivoNovo = path.join(endereco, outputFile);
   const textoPalavras = montaSaidaArquivo(listaPalavras, minCount);
 
   await fs.promises.writeFile(arquivoNovo, textoPalavras);
-  console.log('arquivo criado');
+  if (!quiet) {
+    console.log('arquivo criado');
+  }
 }
