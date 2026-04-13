@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildProgram, validaEntrada, processaArquivo } from '../cli.js';
+import { buildProgram, validateInput, processFile } from '../cli.js';
 import chalk from 'chalk';
 import path from 'path';
 
@@ -27,9 +27,9 @@ describe('CLI', () => {
     );
   });
 
-  describe('validaEntrada', () => {
+  describe('validateInput', () => {
     it('deve rejeitar extensão diferente de .txt', async () => {
-      await expect(validaEntrada('origem.md', 'destino')).rejects.toThrow(
+      await expect(validateInput('origem.md', 'destino')).rejects.toThrow(
         'Arquivo precisa ter extensão .txt: origem.md'
       );
     });
@@ -42,7 +42,7 @@ describe('CLI', () => {
         return Promise.resolve();
       });
 
-      await expect(validaEntrada('origem.txt', 'destino')).rejects.toThrow(
+      await expect(validateInput('origem.txt', 'destino')).rejects.toThrow(
         'Arquivo não encontrado: origem.txt'
       );
     });
@@ -62,7 +62,7 @@ describe('CLI', () => {
         } as unknown as fs.Stats);
       });
 
-      await expect(validaEntrada('origem.txt', 'destino')).rejects.toThrow(
+      await expect(validateInput('origem.txt', 'destino')).rejects.toThrow(
         'Não é um arquivo: origem.txt'
       );
     });
@@ -79,7 +79,7 @@ describe('CLI', () => {
         isDirectory: () => true,
       } as unknown as fs.Stats);
 
-      await expect(validaEntrada('origem.txt', 'destino')).rejects.toThrow(
+      await expect(validateInput('origem.txt', 'destino')).rejects.toThrow(
         'Diretório não existe: destino'
       );
     });
@@ -99,7 +99,7 @@ describe('CLI', () => {
         } as unknown as fs.Stats);
       });
 
-      await expect(validaEntrada('origem.txt', 'destino')).rejects.toThrow(
+      await expect(validateInput('origem.txt', 'destino')).rejects.toThrow(
         'Não é um diretório: destino'
       );
     });
@@ -318,7 +318,7 @@ describe('E2E: File Operations Pipeline', () => {
     fs.writeFileSync(inputFile, inputContent, 'utf-8');
 
     // Execute: Process file with real file I/O (not mocked)
-    await processaArquivo(inputFile, tempOutputDir, 1, 2);
+    await processFile(inputFile, tempOutputDir, 1, 2);
 
     // Verify: Output file exists
     const outputFile = path.join(tempOutputDir, 'resultado.txt');
@@ -337,7 +337,7 @@ describe('E2E: File Operations Pipeline', () => {
 
     fs.writeFileSync(inputFile, inputContent, 'utf-8');
 
-    await processaArquivo(inputFile, tempOutputDir, 2, 2);
+    await processFile(inputFile, tempOutputDir, 2, 2);
 
     const outputFile = path.join(tempOutputDir, 'resultado.txt');
     expect(fs.existsSync(outputFile)).toBe(true);
@@ -353,7 +353,7 @@ describe('E2E: File Operations Pipeline', () => {
 
     fs.writeFileSync(inputFile, inputContent, 'utf-8');
 
-    await processaArquivo(inputFile, tempOutputDir, 1, 2);
+    await processFile(inputFile, tempOutputDir, 1, 2);
 
     const outputFile = path.join(tempOutputDir, 'resultado.txt');
     expect(fs.existsSync(outputFile)).toBe(true);
@@ -367,7 +367,7 @@ describe('E2E: File Operations Pipeline', () => {
 
     fs.writeFileSync(inputFile, '', 'utf-8');
 
-    await processaArquivo(inputFile, tempOutputDir, 1, 2);
+    await processFile(inputFile, tempOutputDir, 1, 2);
 
     const outputFile = path.join(tempOutputDir, 'resultado.txt');
     expect(fs.existsSync(outputFile)).toBe(true);
@@ -383,7 +383,7 @@ describe('E2E: File Operations Pipeline', () => {
 
     fs.writeFileSync(inputFile, inputContent, 'utf-8');
 
-    await processaArquivo(inputFile, tempOutputDir, 1, 2);
+    await processFile(inputFile, tempOutputDir, 1, 2);
 
     const outputFile = path.join(tempOutputDir, 'resultado.txt');
     const outputContent = fs.readFileSync(outputFile, 'utf-8');
@@ -400,7 +400,7 @@ describe('E2E: File Operations Pipeline', () => {
     fs.writeFileSync(inputFile, inputContent, 'utf-8');
 
     // Execute with custom output filename
-    await processaArquivo(inputFile, tempOutputDir, 1, 2, 'custom.txt');
+    await processFile(inputFile, tempOutputDir, 1, 2, 'custom.txt');
 
     // Verify: Custom output file exists
     const customOutputFile = path.join(tempOutputDir, 'custom.txt');
@@ -426,7 +426,7 @@ describe('E2E: File Operations Pipeline', () => {
     const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     // Execute with quiet flag
-    await processaArquivo(inputFile, tempOutputDir, 1, 1, undefined, true);
+    await processFile(inputFile, tempOutputDir, 1, 1, undefined, true);
 
     // Verify: console.log was NOT called ("arquivo criado" message)
     expect(consoleLogSpy).not.toHaveBeenCalledWith('arquivo criado');
@@ -447,7 +447,7 @@ describe('E2E: File Operations Pipeline', () => {
     const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     // Execute with BOTH --output and --quiet
-    await processaArquivo(inputFile, tempOutputDir, 1, 2, 'combined.txt', true);
+    await processFile(inputFile, tempOutputDir, 1, 2, 'combined.txt', true);
 
     // Verify: Custom file exists
     const customOutputFile = path.join(tempOutputDir, 'combined.txt');

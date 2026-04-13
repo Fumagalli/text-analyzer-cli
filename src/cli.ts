@@ -2,22 +2,22 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import trataErros from './erros/funcoesErro.js';
-import { contaPalavras, type ContagemParagrafo } from './index.js';
-import { montaSaidaArquivo } from './helpers.js';
+import { countWords, type WordCountMap } from './index.js';
+import { buildOutputFormat } from './helpers.js';
 import { Command } from 'commander';
 import chalk from 'chalk';
 
-export function validaInteiroPositivo(valor: string, nome: string): number {
-  const numero = parseInt(valor, 10);
+export function validatePositiveInteger(value: string, name: string): number {
+  const number = parseInt(value, 10);
 
-  if (Number.isNaN(numero) || numero <= 0) {
+  if (Number.isNaN(number) || number <= 0) {
     console.error(
-      chalk.red(`erro: ${nome} deve ser um número inteiro positivo`)
+      chalk.red(`erro: ${name} deve ser um número inteiro positivo`)
     );
     process.exit(1);
   }
 
-  return numero;
+  return number;
 }
 
 export function buildProgram(): Command {
@@ -61,20 +61,20 @@ export function buildProgram(): Command {
           return;
         }
 
-        const minCharsNumero = validaInteiroPositivo(minChars, '--min-chars');
-        const minCountNumero = validaInteiroPositivo(minCount, '--min-count');
+        const minCharsNumber = validatePositiveInteger(minChars, '--min-chars');
+        const minCountNumber = validatePositiveInteger(minCount, '--min-count');
 
-        const caminhoTexto = path.resolve(texto);
-        const caminhoDestino = path.resolve(destino);
+        const textPath = path.resolve(texto);
+        const destinationPath = path.resolve(destino);
 
         try {
-          await validaEntrada(caminhoTexto, caminhoDestino, quiet);
+          await validateInput(textPath, destinationPath, quiet);
 
-          await processaArquivo(
-            caminhoTexto,
-            caminhoDestino,
-            minCharsNumero,
-            minCountNumero,
+          await processFile(
+            textPath,
+            destinationPath,
+            minCharsNumber,
+            minCountNumber,
             output,
             quiet
           );
@@ -100,62 +100,62 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   program.parse();
 }
 
-export async function validaEntrada(
-  caminhoTexto: string,
-  caminhoDestino: string,
+export async function validateInput(
+  textPath: string,
+  destinationPath: string,
   _quiet?: boolean
 ): Promise<void> {
-  if (path.extname(caminhoTexto).toLowerCase() !== '.txt') {
-    throw new Error(`Arquivo precisa ter extensão .txt: ${caminhoTexto}`);
+  if (path.extname(textPath).toLowerCase() !== '.txt') {
+    throw new Error(`Arquivo precisa ter extensão .txt: ${textPath}`);
   }
 
   try {
-    await fs.promises.access(caminhoTexto, fs.constants.R_OK);
+    await fs.promises.access(textPath, fs.constants.R_OK);
   } catch {
-    throw new Error(`Arquivo não encontrado: ${caminhoTexto}`);
+    throw new Error(`Arquivo não encontrado: ${textPath}`);
   }
 
-  const statsTexto = await fs.promises.stat(caminhoTexto);
-  if (!statsTexto.isFile()) {
-    throw new Error(`Não é um arquivo: ${caminhoTexto}`);
+  const textStats = await fs.promises.stat(textPath);
+  if (!textStats.isFile()) {
+    throw new Error(`Não é um arquivo: ${textPath}`);
   }
 
   try {
-    await fs.promises.access(caminhoDestino, fs.constants.R_OK);
+    await fs.promises.access(destinationPath, fs.constants.R_OK);
   } catch {
-    throw new Error(`Diretório não existe: ${caminhoDestino}`);
+    throw new Error(`Diretório não existe: ${destinationPath}`);
   }
 
-  const statsDestino = await fs.promises.stat(caminhoDestino);
-  if (!statsDestino.isDirectory()) {
-    throw new Error(`Não é um diretório: ${caminhoDestino}`);
+  const destinationStats = await fs.promises.stat(destinationPath);
+  if (!destinationStats.isDirectory()) {
+    throw new Error(`Não é um diretório: ${destinationPath}`);
   }
 }
 
-export async function processaArquivo(
-  texto: string,
-  destino: string,
+export async function processFile(
+  text: string,
+  destination: string,
   minChars: number,
   minCount: number,
   outputFile?: string,
   quiet?: boolean
 ): Promise<void> {
-  const conteudo = await fs.promises.readFile(texto, 'utf-8');
-  const resultado = contaPalavras(conteudo, minChars);
-  await criaESalvaArquivo(resultado, destino, minCount, outputFile, quiet);
+  const content = await fs.promises.readFile(text, 'utf-8');
+  const result = countWords(content, minChars);
+  await createAndSaveFile(result, destination, minCount, outputFile, quiet);
 }
 
-export async function criaESalvaArquivo(
-  listaPalavras: ContagemParagrafo[],
-  endereco: string,
+export async function createAndSaveFile(
+  wordList: WordCountMap[],
+  destination: string,
   minCount: number,
   outputFile: string = 'resultado.txt',
   quiet?: boolean
 ): Promise<void> {
-  const arquivoNovo = path.join(endereco, outputFile);
-  const textoPalavras = montaSaidaArquivo(listaPalavras, minCount);
+  const newFile = path.join(destination, outputFile);
+  const wordOutput = buildOutputFormat(wordList, minCount);
 
-  await fs.promises.writeFile(arquivoNovo, textoPalavras);
+  await fs.promises.writeFile(newFile, wordOutput);
   if (!quiet) {
     console.log('arquivo criado');
   }
