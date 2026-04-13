@@ -20,3 +20,13 @@ resultados/
 # Environment
 .env
 .env.local
+
+# Test coverage (local only, don't commit)
+coverage/
+*.lcov
+.nyc_output/
+
+# Test coverage (local only, don't commit)
+coverage/
+*.lcov
+.nyc_output/
