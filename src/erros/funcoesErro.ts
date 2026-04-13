@@ -1,4 +1,10 @@
-type ErroComCodigo = Error & { code?: string };
+/**
+ * Erro com código de sistema de arquivos (ENOENT, EACCES, etc.)
+ * Usado para tratamento específico de erros de I/O
+ */
+interface ErroComCodigo extends Error {
+  code?: string;
+}
 
 export default function trataErros(erro: ErroComCodigo): never {
   if (erro.code) {

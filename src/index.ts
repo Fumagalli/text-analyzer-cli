@@ -1,12 +1,19 @@
 /**
+ * Contagem de palavras por parágrafo: palavra -> número de ocorrências
+ */
+export interface ContagemParagrafo {
+  [palavra: string]: number;
+}
+
+/**
  * Conta palavras duplicadas em cada parágrafo do texto fornecido.
  */
 export function contaPalavras(
   texto: string,
   minChars: number = 3
-): Record<string, number>[] {
+): ContagemParagrafo[] {
   const paragrafos = extraiParagrafos(texto);
-  const contagem = paragrafos.flatMap((paragrafo): Record<string, number>[] => {
+  const contagem = paragrafos.flatMap((paragrafo): ContagemParagrafo[] => {
     if (!paragrafo) return [];
 
     return [verificaPalavrasDuplicadas(paragrafo, minChars)];
@@ -40,9 +47,9 @@ function limpaPalavras(palavra: string): string {
 function verificaPalavrasDuplicadas(
   texto: string,
   minChars: number
-): Record<string, number> {
+): ContagemParagrafo {
   const listaPalavras = texto.split(/\s+/);
-  const resultado: Record<string, number> = {};
+  const resultado: ContagemParagrafo = {};
 
   listaPalavras.forEach((palavra) => {
     const palavraLimpa = limpaPalavras(palavra);

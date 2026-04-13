@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import trataErros from './erros/funcoesErro.js';
-import { contaPalavras } from './index.js';
+import { contaPalavras, type ContagemParagrafo } from './index.js';
 import { montaSaidaArquivo } from './helpers.js';
 import { Command } from 'commander';
 import chalk from 'chalk';
@@ -146,7 +146,7 @@ export async function processaArquivo(
 }
 
 export async function criaESalvaArquivo(
-  listaPalavras: Record<string, number>[],
+  listaPalavras: ContagemParagrafo[],
   endereco: string,
   minCount: number,
   outputFile: string = 'resultado.txt',
